@@ -3,104 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CardioLog - Контроль давления</title>
-    <!-- Подключаем шрифт Inter для профессионального вида -->
+    <title>CardioLog - Профессиональный контроль</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- Подключаем стили -->
     <link rel="stylesheet" href="style.css">
-    <!-- Подключаем библиотеку для графиков -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-    <!-- Боковое меню / Навигация -->
+    <!-- Навигация -->
     <nav class="sidebar">
         <div class="logo">
             <div class="heart-icon">❤</div>
             <span>CardioLog</span>
         </div>
         <div class="nav-links">
-            <a href="#" class="active">Главная</a>
-            <a href="#">Журнал</a>
-            <a href="#">Отчеты</a>
-            <a href="#">Настройки</a>
+            <button class="nav-btn active" onclick="switchTab('dashboard')">Главная</button>
+            <button class="nav-btn" onclick="switchTab('history')">Журнал</button>
+            <button class="nav-btn" onclick="switchTab('settings')">Настройки</button>
         </div>
     </nav>
 
     <!-- Основной контент -->
     <main class="main-content">
         <header>
-            <h1>Дневник наблюдений</h1>
-            <div class="user-profile">Иван И.</div>
+            <h1 id="pageTitle">Главная панель</h1>
+            <!-- Кликабельное имя -->
+            <div class="user-profile" onclick="editName()" title="Нажмите, чтобы изменить">
+                <span id="userNameDisplay">Пользователь</span> ✎
+            </div>
         </header>
 
-        <!-- Сетка дашборда -->
-        <div class="dashboard-grid">
-            
-            <!-- Блок ввода данных -->
-            <section class="card input-card">
-                <h2>Новая запись</h2>
-                <form id="bpForm">
-                    <div class="input-group">
-                        <label>Систолическое (Верх)</label>
-                        <input type="number" id="sysInput" placeholder="120" required>
-                    </div>
-                    <div class="input-group">
-                        <label>Диастолическое (Низ)</label>
-                        <input type="number" id="diaInput" placeholder="80" required>
-                    </div>
-                    <div class="input-group">
-                        <label>Пульс (уд/мин)</label>
-                        <input type="number" id="pulseInput" placeholder="60" required>
-                    </div>
-                    <div class="input-group full-width">
-                        <label>Метка (например: утро, после таблеток)</label>
-                        <input type="text" id="noteInput" placeholder="Комментарий...">
-                    </div>
-                    <button type="submit" class="btn-primary">Сохранить показатели</button>
-                </form>
-            </section>
+        <!-- Вкладка: ДАШБОРД (Главная) -->
+        <div id="dashboard" class="tab-content active-tab">
+            <div class="dashboard-grid">
+                
+                <!-- Форма ввода -->
+                <section class="card input-card">
+                    <h2>Новое измерение</h2>
+                    <form id="bpForm">
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>SYS (Верхнее)</label>
+                                <input type="number" id="sysInput" placeholder="120" required min="50" max="300">
+                            </div>
+                            <div class="input-group">
+                                <label>DIA (Нижнее)</label>
+                                <input type="number" id="diaInput" placeholder="80" required min="30" max="200">
+                            </div>
+                            <div class="input-group">
+                                <label>Пульс</label>
+                                <input type="number" id="pulseInput" placeholder="60" required min="30" max="250">
+                            </div>
+                        </div>
+                        <div class="input-group full-width">
+                            <input type="text" id="noteInput" placeholder="Метка (например: после бега)">
+                        </div>
+                        <button type="submit" class="btn-primary">Записать</button>
+                    </form>
+                </section>
 
-            <!-- Блок статуса (Появляется после ввода) -->
-            <section class="card status-card">
-                <h2>Текущее состояние</h2>
-                <div class="status-display" id="statusDisplay">
-                    <span class="placeholder-text">Нет данных за сегодня</span>
-                </div>
-            </section>
-
-            <!-- Блок с графиком -->
-            <section class="card chart-card">
-                <div class="chart-header">
-                    <h2>Динамика давления (7 дней)</h2>
-                    <div class="legend">
-                        <span class="dot sys"></span> SYS
-                        <span class="dot dia"></span> DIA
+                <!-- Статус -->
+                <section class="card status-card">
+                    <h2>Последний замер</h2>
+                    <div class="status-display" id="statusDisplay">
+                        <span class="text-muted">Нет записей</span>
                     </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="pressureChart"></canvas>
-                </div>
-            </section>
+                </section>
 
-            <!-- Таблица истории -->
-            <section class="card history-card">
-                <h2>История измерений</h2>
+                <!-- График -->
+                <section class="card chart-card">
+                    <div class="chart-header">
+                        <h2>Динамика (последние 10 замеров)</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="pressureChart"></canvas>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Вкладка: ЖУРНАЛ -->
+        <div id="history" class="tab-content">
+            <section class="card">
+                <div class="card-header-row">
+                    <h2>Полная история измерений</h2>
+                    <button class="btn-secondary" onclick="clearAllData()">🗑 Очистить всё</button>
+                </div>
                 <table>
                     <thead>
                         <tr>
-                            <th>Дата/Время</th>
-                            <th>Давление</th>
+                            <th>Дата</th>
+                            <th>Показатели</th>
                             <th>Пульс</th>
-                            <th>Статус</th>
+                            <th>Категория</th>
+                            <th>Заметка</th>
+                            <th>Действие</th>
                         </tr>
                     </thead>
-                    <tbody id="historyTableBody">
-                        <!-- Сюда попадут данные из JS -->
+                    <tbody id="fullHistoryBody">
+                        <!-- JS заполнит это -->
                     </tbody>
                 </table>
             </section>
         </div>
+
+        <!-- Вкладка: НАСТРОЙКИ -->
+        <div id="settings" class="tab-content">
+            <section class="card" style="max-width: 500px;">
+                <h2>Профиль пользователя</h2>
+                <div class="input-group">
+                    <label>Ваше имя</label>
+                    <input type="text" id="settingsNameInput" placeholder="Введите имя">
+                </div>
+                <button class="btn-primary" style="margin-top: 15px;" onclick="saveSettings()">Сохранить настройки</button>
+            </section>
+        </div>
+
     </main>
 
     <script src="script.js"></script>
