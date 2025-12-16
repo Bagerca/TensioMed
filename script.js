@@ -1,7 +1,3 @@
-/**
- * CardioLog Pro - Logic
- */
-
 const AppState = {
     userName: "Пользователь",
     isDarkMode: false,
@@ -10,23 +6,18 @@ const AppState = {
 
 let pressureChartInstance = null;
 
-// --- Init ---
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     initChart();
     renderApp();
     setDefaultDate();
 
-    // Слушатели
     document.getElementById('bpForm').addEventListener('submit', handleFormSubmit);
     
-    // Переключатель темы
     const toggle = document.getElementById('themeToggle');
     if(toggle) {
         toggle.checked = AppState.isDarkMode;
-        toggle.addEventListener('change', (e) => {
-            toggleTheme(e.target.checked);
-        });
+        toggle.addEventListener('change', (e) => toggleTheme(e.target.checked));
     }
 });
 
@@ -36,14 +27,13 @@ function setDefaultDate() {
     document.getElementById('dateInput').value = now.toISOString().slice(0, 16);
 }
 
-// --- LocalStorage ---
 function saveData() {
-    localStorage.setItem('cardioPro_v1', JSON.stringify(AppState));
+    localStorage.setItem('cardioPro_v2', JSON.stringify(AppState));
     renderApp();
 }
 
 function loadData() {
-    const rawData = localStorage.getItem('cardioPro_v1');
+    const rawData = localStorage.getItem('cardioPro_v2');
     if (rawData) {
         const parsed = JSON.parse(rawData);
         AppState.userName = parsed.userName || "Пользователь";
@@ -60,23 +50,18 @@ function clearAllData() {
     }
 }
 
-// --- Theme Logic ---
 function toggleTheme(isChecked) {
     AppState.isDarkMode = isChecked;
     applyTheme(isChecked);
     saveData();
-    updateChartTheme(); // Важно: обновляем цвета графика
+    updateChartTheme();
 }
 
 function applyTheme(isDark) {
-    if (isDark) {
-        document.body.classList.add('dark-mode');
-    } else {
-        document.body.classList.remove('dark-mode');
-    }
+    if (isDark) document.body.classList.add('dark-mode');
+    else document.body.classList.remove('dark-mode');
 }
 
-// --- Form Logic ---
 function handleFormSubmit(e) {
     e.preventDefault();
     const dateVal = document.getElementById('dateInput').value;
@@ -109,13 +94,15 @@ function deleteRecord(id) {
     }
 }
 
-// --- UI Logic ---
 function switchTab(tabId) {
+    // Скрываем все вкладки
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
     document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
     
+    // Показываем нужную
     document.getElementById(tabId).classList.add('active-tab');
-    // Простая подсветка кнопок
+    
+    // Подсветка кнопок
     const btns = document.querySelectorAll('.nav-btn');
     if(tabId === 'dashboard') btns[0].classList.add('active');
     if(tabId === 'history') btns[1].classList.add('active');
@@ -136,7 +123,6 @@ function saveSettings() {
     }
 }
 
-// --- Render ---
 function renderApp() {
     document.getElementById('userNameDisplay').innerText = AppState.userName;
 
@@ -191,12 +177,9 @@ function renderTable(records) {
     });
 }
 
-// --- Chart.js ---
 function initChart() {
     const ctx = document.getElementById('pressureChart');
     if(!ctx) return;
-
-    // Получаем текущие цвета из CSS
     const styles = getComputedStyle(document.body);
     const gridColor = styles.getPropertyValue('--border').trim();
     const textColor = styles.getPropertyValue('--text-muted').trim();
@@ -210,16 +193,8 @@ function initChart() {
             interaction: { mode: 'index', intersect: false },
             plugins: { legend: { display: false } },
             scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: { color: textColor }
-                },
-                y: {
-                    grid: { color: gridColor },
-                    ticks: { color: textColor },
-                    suggestedMin: 50,
-                    suggestedMax: 160
-                }
+                x: { grid: { display: false }, ticks: { color: textColor } },
+                y: { grid: { color: gridColor }, ticks: { color: textColor }, suggestedMin: 50, suggestedMax: 160 }
             }
         }
     });
@@ -227,52 +202,33 @@ function initChart() {
 
 function updateChartTheme() {
     if(!pressureChartInstance) return;
-    
     const styles = getComputedStyle(document.body);
     const gridColor = styles.getPropertyValue('--border').trim();
     const textColor = styles.getPropertyValue('--text-muted').trim();
 
-    // Обновляем настройки осей
     pressureChartInstance.options.scales.y.grid.color = gridColor;
     pressureChartInstance.options.scales.y.ticks.color = textColor;
     pressureChartInstance.options.scales.x.ticks.color = textColor;
-    
     pressureChartInstance.update();
 }
 
 function updateChartData(records) {
     if(!pressureChartInstance) return;
-    const recent = records.slice(-10); // Последние 10 точек
+    const recent = records.slice(-10);
 
-    pressureChartInstance.data.labels = recent.map(r => {
-        return new Date(r.timestamp).toLocaleDateString('ru-RU', {day:'numeric', month:'numeric'});
-    });
-
+    pressureChartInstance.data.labels = recent.map(r => new Date(r.timestamp).toLocaleDateString('ru-RU', {day:'numeric', month:'numeric'}));
     pressureChartInstance.data.datasets = [
         {
-            label: 'SYS',
-            data: recent.map(r => r.sys),
-            borderColor: '#E53935',
-            backgroundColor: 'rgba(229, 57, 53, 0.1)',
-            borderWidth: 3,
-            tension: 0.4,
-            fill: true,
-            pointRadius: 4,
-            pointBackgroundColor: '#fff',
-            pointBorderColor: '#E53935'
+            label: 'SYS', data: recent.map(r => r.sys),
+            borderColor: '#E53935', backgroundColor: 'rgba(229, 57, 53, 0.1)',
+            borderWidth: 3, tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#fff', pointBorderColor: '#E53935'
         },
         {
-            label: 'DIA',
-            data: recent.map(r => r.dia),
+            label: 'DIA', data: recent.map(r => r.dia),
             borderColor: AppState.isDarkMode ? '#9E9E9E' : '#667085',
-            borderWidth: 2,
-            borderDash: [6, 6],
-            tension: 0.4,
-            pointRadius: 0
+            borderWidth: 2, borderDash: [6, 6], tension: 0.4, pointRadius: 0
         }
     ];
-    
-    // Обновить цвета темы перед рендером
     updateChartTheme();
 }
 
