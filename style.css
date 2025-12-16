@@ -15,7 +15,7 @@
     --color-warning: #F79009;
     --color-danger: #F04438;
 
-    /* ВАЖНО: Говорим браузеру, что у нас есть светлая тема для нативных элементов */
+    /* Браузер понимает, что тема светлая */
     color-scheme: light;
 }
 
@@ -32,7 +32,7 @@ body.dark-mode {
     --btn-control-bg: #333333;
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 
-    /* ВАЖНО: Переключаем нативные попапы (календарь) в темный режим */
+    /* Браузер понимает, что тема темная (для календаря) */
     color-scheme: dark;
 }
 
@@ -131,60 +131,30 @@ h2 { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 
 .input-group { display: flex; flex-direction: column; }
 .input-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
 
-/* Скрываем стандартные стрелки браузера */
+/* Скрываем стандартные стрелки */
 input[type="number"]::-webkit-inner-spin-button, 
 input[type="number"]::-webkit-outer-spin-button { 
     -webkit-appearance: none; margin: 0; 
 }
 input[type="number"] { -moz-appearance: textfield; }
 
-/* Контейнер для кастомного инпута */
+/* Кастомный инпут с кнопками */
 .custom-number-input {
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--input-bg);
-    overflow: hidden;
-    transition: 0.2s;
+    display: flex; align-items: center; border: 1px solid var(--border);
+    border-radius: 10px; background: var(--input-bg); overflow: hidden; transition: 0.2s;
 }
-.custom-number-input:focus-within {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-soft);
-}
+.custom-number-input:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
 
-/* Сам инпут внутри контейнера */
-.custom-number-input input {
-    border: none;
-    box-shadow: none;
-    text-align: center;
-    padding: 10px 0;
-    width: 100%;
-}
+.custom-number-input input { border: none; box-shadow: none; text-align: center; padding: 10px 0; width: 100%; }
 .custom-number-input input:focus { box-shadow: none; }
 
-/* Кнопки +/- */
 .spin-btn {
-    width: 30px;
-    height: 100%;
-    border: none;
-    background: var(--btn-control-bg);
-    color: var(--text-muted);
-    font-weight: bold;
-    font-size: 18px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: 0.2s;
+    width: 30px; height: 100%; border: none; background: var(--btn-control-bg); color: var(--text-muted);
+    font-weight: bold; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;
 }
-.spin-btn:hover {
-    background: var(--border);
-    color: var(--primary);
-}
+.spin-btn:hover { background: var(--border); color: var(--primary); }
 .spin-btn:active { background: var(--primary-soft); }
 
-/* Обычный инпут (дата, текст) */
 input.std-input {
     width: 100%; background: var(--input-bg); color: var(--text-main);
     border: 1px solid var(--border); border-radius: 10px; padding: 12px;
@@ -192,11 +162,8 @@ input.std-input {
 }
 input.std-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-soft); }
 
-/* Красим иконку календаря в темной теме */
-body.dark-mode input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    cursor: pointer;
-}
+/* Инверсия иконки календаря */
+body.dark-mode input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
 
 .btn-primary {
     width: 100%; background: var(--primary); color: #fff; border: none; border-radius: 10px;
@@ -207,7 +174,15 @@ body.dark-mode input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 
 /* --- OTHER --- */
 .chart-card { grid-column: 1 / 2; }
+.chart-header { display: flex; justify-content: space-between; align-items: center; }
 .chart-container { height: 250px; width: 100%; }
+
+.btn-icon-action {
+    background: transparent; border: 1px solid var(--border); border-radius: 8px; width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: 0.2s;
+}
+.btn-icon-action:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
+
 .table-wrapper { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 th { text-align: left; padding: 12px 0; color: var(--text-muted); font-size: 12px; border-bottom: 1px solid var(--border); }
@@ -218,6 +193,14 @@ td { padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 14px; c
     border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; float: right; transition: 0.2s;
 }
 .btn-delete:hover { color: var(--color-danger); border-color: var(--color-danger); }
+
+/* --- PRINTING MODE (Стили для скачивания) --- */
+.printing-mode .input-card { display: none !important; }
+.printing-mode.dashboard-grid {
+    display: flex !important; flex-direction: column; gap: 20px; width: 800px; margin: 0 auto;
+    background: var(--bg-body); padding: 20px;
+}
+.printing-mode .status-card, .printing-mode .chart-card { box-shadow: none; border: 1px solid var(--border); }
 
 /* --- SWITCH --- */
 .theme-toggle-container { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;}
