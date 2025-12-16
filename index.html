@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CardioLog Pro</title>
+    <!-- Шрифт Manrope для современного вида цифр -->
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- Библиотека графиков -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
+    <!-- Боковая панель -->
     <nav class="sidebar">
         <div class="logo">
             <div class="heart-pulse-icon">
@@ -23,7 +26,6 @@
         
         <div class="nav-links">
             <button class="nav-btn active" onclick="switchTab('dashboard')">
-                <!-- Иконка Dashboard -->
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="3" width="7" height="9"></rect>
                     <rect x="14" y="3" width="7" height="5"></rect>
@@ -33,7 +35,6 @@
                 Главная
             </button>
             <button class="nav-btn" onclick="switchTab('history')">
-                <!-- Иконка Журнал -->
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="14 2 14 8 20 8"></polyline>
@@ -44,7 +45,6 @@
                 Журнал
             </button>
             <button class="nav-btn" onclick="switchTab('settings')">
-                <!-- Иконка Настройки -->
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="3"></circle>
                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -62,6 +62,7 @@
         </div>
     </nav>
 
+    <!-- Основной контент -->
     <main class="main-content">
         <header>
             <div>
@@ -70,7 +71,6 @@
             </div>
             <div class="user-profile" onclick="editName()">
                 <div class="avatar-circle">
-                    <!-- Иконка профиля -->
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                         <circle cx="12" cy="7" r="4"></circle>
@@ -80,20 +80,21 @@
             </div>
         </header>
 
-        <!-- DASHBOARD (Только главное) -->
+        <!-- DASHBOARD TAB -->
         <div id="dashboard" class="tab-content active-tab">
             <div class="dashboard-grid">
                 
-                <!-- Блок статуса с АНИМАЦИЕЙ -->
+                <!-- Блок статуса с ИСПРАВЛЕННОЙ АНИМАЦИЕЙ -->
                 <section class="card status-card">
                     <div class="card-header-simple">
                         <h2>Текущее состояние</h2>
                         <span class="live-indicator">LIVE ●</span>
                     </div>
                     
-                    <div class="ecg-container">
-                        <svg class="ecg-svg" viewBox="0 0 500 100" preserveAspectRatio="none">
-                            <polyline points="0,50 100,50 120,20 140,80 160,50 200,50 250,50 300,50 320,20 340,80 360,50 400,50 500,50" 
+                    <div class="ecg-wrapper">
+                        <!-- Широкий viewBox для плавности и центрированный зубец -->
+                        <svg class="ecg-svg" viewBox="0 0 600 100" preserveAspectRatio="none">
+                            <polyline points="0,50 240,50 250,65 265,10 280,90 295,50 600,50" 
                                       class="ecg-line"></polyline>
                         </svg>
                     </div>
@@ -103,7 +104,7 @@
                     </div>
                 </section>
 
-                <!-- Ввод данных -->
+                <!-- Форма ввода -->
                 <section class="card input-card">
                     <h2>Новая запись</h2>
                     <form id="bpForm">
@@ -149,7 +150,7 @@
             </div>
         </div>
 
-        <!-- HISTORY (Только таблица) -->
+        <!-- HISTORY TAB -->
         <div id="history" class="tab-content">
             <section class="card">
                 <div class="card-header-row">
@@ -174,7 +175,7 @@
             </section>
         </div>
 
-        <!-- SETTINGS -->
+        <!-- SETTINGS TAB -->
         <div id="settings" class="tab-content">
             <section class="card settings-card">
                 <h2>Профиль</h2>
