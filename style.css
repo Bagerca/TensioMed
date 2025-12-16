@@ -1,10 +1,10 @@
 :root {
     /* Цветовая палитра (Light) */
-    --primary: #E53935;          /* Основной красный */
+    --primary: #E53935;
     --primary-soft: rgba(229, 57, 53, 0.1);
-    --bg-body: #F2F4F7;          /* Чуть холодный серый */
+    --bg-body: #F2F4F7;
     --bg-card: #FFFFFF;
-    --text-main: #1D2939;        /* Почти черный */
+    --text-main: #1D2939;
     --text-muted: #667085;
     --border: #E4E7EC;
     --input-bg: #FFFFFF;
@@ -18,15 +18,15 @@
 
 /* Тёмная тема (Dark) */
 body.dark-mode {
-    --primary: #FF5252;          /* Чуть ярче для контраста */
+    --primary: #FF5252;
     --primary-soft: rgba(255, 82, 82, 0.15);
-    --bg-body: #121212;          /* Глубокий черный фон */
-    --bg-card: #1E1E1E;          /* Темно-серые карточки */
+    --bg-body: #121212;
+    --bg-card: #1E1E1E;
     --text-main: #E0E0E0;
     --text-muted: #9E9E9E;
     --border: #333333;
     --input-bg: #2C2C2C;
-    --shadow: 0 4px 20px rgba(0, 0, 0, 0.4); /* Глубокая тень */
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,6 +39,22 @@ body {
     height: 100vh;
     overflow: hidden;
     transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* --- ВАЖНО: ВКЛАДКИ --- */
+/* Скрываем все вкладки по умолчанию */
+.tab-content {
+    display: none !important; 
+}
+/* Показываем только активную */
+.tab-content.active-tab {
+    display: block !important;
+    animation: fadeEffect 0.3s;
+}
+
+@keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
 }
 
 /* --- SIDEBAR --- */
@@ -74,7 +90,6 @@ body {
     border-radius: 8px;
     color: var(--primary);
 }
-.heart-pulse-icon svg { width: 20px; height: 20px; }
 
 .nav-links { flex: 1; }
 
@@ -94,7 +109,15 @@ body {
     transition: 0.2s;
     font-family: inherit;
 }
-.nav-btn .icon { margin-right: 12px; font-size: 18px; }
+
+/* Стили для новых SVG иконок */
+.nav-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    transition: 0.2s;
+}
+
 .nav-btn:hover { background: var(--bg-body); color: var(--text-main); }
 .nav-btn.active { background: var(--primary-soft); color: var(--primary); }
 
@@ -130,7 +153,7 @@ h1 { font-size: 24px; font-weight: 700; color: var(--text-main); }
     align-items: center;
     justify-content: center;
     margin-right: 10px;
-    font-size: 14px;
+    color: var(--text-muted);
 }
 
 /* --- CARDS & GRID --- */
@@ -151,7 +174,7 @@ h1 { font-size: 24px; font-weight: 700; color: var(--text-main); }
 
 h2 { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 20px; }
 
-/* --- ECG ANIMATION (СЕРДЦЕБИЕНИЕ) --- */
+/* --- ECG ANIMATION --- */
 .status-card { grid-column: 1 / 2; position: relative; overflow: hidden; }
 
 .card-header-simple { display: flex; justify-content: space-between; align-items: center; z-index: 2; position: relative; }
@@ -165,11 +188,7 @@ h2 { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 
     opacity: 0.5;
 }
 
-.ecg-svg {
-    width: 100%;
-    height: 100%;
-}
-
+.ecg-svg { width: 100%; height: 100%; }
 .ecg-line {
     fill: none;
     stroke: var(--primary);
@@ -201,7 +220,6 @@ input {
     transition: 0.2s;
     font-family: inherit;
 }
-
 input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-soft); }
 
 .btn-primary {
@@ -258,15 +276,13 @@ td { padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 14px; c
 input:checked + .slider { background-color: var(--primary); }
 input:checked + .slider:before { transform: translateX(20px); }
 
-/* --- KEYFRAMES --- */
 @keyframes dash {
     0% { stroke-dashoffset: 500; }
     40% { stroke-dashoffset: 0; }
-    100% { stroke-dashoffset: 0; } /* Пауза */
+    100% { stroke-dashoffset: 0; }
 }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-/* Responsive */
 @media (max-width: 900px) {
     .dashboard-grid { grid-template-columns: 1fr; }
     .input-card { grid-column: 1; grid-row: auto; }
