@@ -1,5 +1,5 @@
 :root {
-    /* Цветовая палитра (Light) */
+    /* Светлая тема */
     --primary: #E53935;
     --primary-soft: rgba(229, 57, 53, 0.1);
     --bg-body: #F2F4F7;
@@ -10,13 +10,13 @@
     --input-bg: #FFFFFF;
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
     
-    /* Статусы */
+    /* Цвета статусов */
     --color-success: #12B76A;
     --color-warning: #F79009;
     --color-danger: #F04438;
 }
 
-/* Тёмная тема (Dark) */
+/* Тёмная тема */
 body.dark-mode {
     --primary: #FF5252;
     --primary-soft: rgba(255, 82, 82, 0.15);
@@ -41,21 +41,10 @@ body {
     transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* --- ВАЖНО: ВКЛАДКИ --- */
-/* Скрываем все вкладки по умолчанию */
-.tab-content {
-    display: none !important; 
-}
-/* Показываем только активную */
-.tab-content.active-tab {
-    display: block !important;
-    animation: fadeEffect 0.3s;
-}
-
-@keyframes fadeEffect {
-    from {opacity: 0;}
-    to {opacity: 1;}
-}
+/* --- ВКЛАДКИ (Исправлено) --- */
+.tab-content { display: none !important; }
+.tab-content.active-tab { display: block !important; animation: fadeEffect 0.3s; }
+@keyframes fadeEffect { from {opacity: 0;} to {opacity: 1;} }
 
 /* --- SIDEBAR --- */
 .sidebar {
@@ -109,19 +98,11 @@ body {
     transition: 0.2s;
     font-family: inherit;
 }
-
-/* Стили для новых SVG иконок */
-.nav-icon {
-    width: 20px;
-    height: 20px;
-    margin-right: 12px;
-    transition: 0.2s;
-}
-
+.nav-icon { width: 20px; height: 20px; margin-right: 12px; transition: 0.2s; }
 .nav-btn:hover { background: var(--bg-body); color: var(--text-main); }
 .nav-btn.active { background: var(--primary-soft); color: var(--primary); }
 
-/* --- MAIN AREA --- */
+/* --- MAIN CONTENT --- */
 .main-content { flex: 1; padding: 40px; overflow-y: auto; }
 
 header {
@@ -159,7 +140,7 @@ h1 { font-size: 24px; font-weight: 700; color: var(--text-main); }
 /* --- CARDS & GRID --- */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 1.2fr 0.8fr; /* Левая колонка шире */
+    grid-template-columns: 1.2fr 0.8fr;
     gap: 24px;
 }
 
@@ -174,36 +155,58 @@ h1 { font-size: 24px; font-weight: 700; color: var(--text-main); }
 
 h2 { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 20px; }
 
-/* --- ECG ANIMATION --- */
-.status-card { grid-column: 1 / 2; position: relative; overflow: hidden; }
-
-.card-header-simple { display: flex; justify-content: space-between; align-items: center; z-index: 2; position: relative; }
-.live-indicator { font-size: 10px; font-weight: 800; color: var(--color-danger); animation: blink 2s infinite; }
-
-.ecg-container {
-    width: 100%;
-    height: 80px;
-    position: relative;
-    margin: 10px 0;
-    opacity: 0.5;
+/* --- ECG ANIMATION (PULSE) - ЦЕНТРИРОВАННАЯ И СВЕТЯЩАЯСЯ --- */
+.status-card { 
+    grid-column: 1 / 2; 
+    position: relative; 
+    overflow: hidden; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 220px; 
 }
 
-.ecg-svg { width: 100%; height: 100%; }
+.card-header-simple { 
+    display: flex; justify-content: space-between; align-items: center; 
+    z-index: 2; position: relative; margin-bottom: 10px;
+}
+.live-indicator { font-size: 10px; font-weight: 800; color: var(--color-danger); animation: blink 2s infinite; letter-spacing: 1px;}
+
+.ecg-wrapper {
+    width: 100%;
+    height: 100px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Маска прозрачности по краям */
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+}
+
+.ecg-svg { width: 100%; height: 100%; overflow: visible; }
+
 .ecg-line {
     fill: none;
     stroke: var(--primary);
-    stroke-width: 2;
+    stroke-width: 3;
     stroke-linejoin: round;
     stroke-linecap: round;
-    stroke-dasharray: 500;
-    stroke-dashoffset: 500;
-    animation: dash 2.5s linear infinite;
+    /* Эффект свечения */
+    filter: drop-shadow(0 0 4px var(--primary)); 
+    /* Анимация движения */
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: dash 3s linear infinite;
 }
+
+.status-display { text-align: center; position: relative; z-index: 2; margin-top: auto; padding-bottom: 5px; }
+.bp-big { font-size: 48px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+.bp-label { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-top: 10px; text-transform: uppercase; }
 
 /* --- FORMS --- */
 .input-card { grid-column: 2 / 3; grid-row: 1 / 3; }
-
-.input-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.input-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; } /* Отступы между полями */
 .input-group { display: flex; flex-direction: column; }
 .input-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
 
@@ -238,19 +241,11 @@ input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-
 }
 .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
 
-/* --- STATUS DISPLAY --- */
-.status-display { text-align: center; margin-top: 10px; position: relative; z-index: 2; }
-.bp-big { font-size: 48px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
-.bp-label { 
-    display: inline-block; padding: 4px 12px; border-radius: 20px; 
-    font-size: 12px; font-weight: 700; margin-top: 10px; text-transform: uppercase;
-}
-
 /* --- CHART --- */
 .chart-card { grid-column: 1 / 2; }
 .chart-container { height: 250px; width: 100%; }
 
-/* --- HISTORY TABLE --- */
+/* --- TABLE --- */
 .table-wrapper { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 th { text-align: left; padding: 12px 0; color: var(--text-muted); font-size: 12px; border-bottom: 1px solid var(--border); }
@@ -266,7 +261,7 @@ td { padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 14px; c
 }
 .btn-delete:hover { color: var(--color-danger); border-color: var(--color-danger); }
 
-/* --- TOGGLE SWITCH --- */
+/* --- SWITCH --- */
 .theme-toggle-container { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;}
 .switch-label { font-size: 14px; color: var(--text-muted); font-weight: 600; }
 .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
@@ -276,9 +271,9 @@ td { padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 14px; c
 input:checked + .slider { background-color: var(--primary); }
 input:checked + .slider:before { transform: translateX(20px); }
 
+/* --- ANIMATIONS --- */
 @keyframes dash {
-    0% { stroke-dashoffset: 500; }
-    40% { stroke-dashoffset: 0; }
+    0% { stroke-dashoffset: 1000; }
     100% { stroke-dashoffset: 0; }
 }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
