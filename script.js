@@ -1,6 +1,5 @@
 /**
- * CardioLog - Script v2
- * Добавлена поддержка дат, пропусков и тёмная тема
+ * CardioLog Pro - Logic
  */
 
 const AppState = {
@@ -11,127 +10,116 @@ const AppState = {
 
 let pressureChartInstance = null;
 
-// --- Инициализация ---
+// --- Init ---
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     initChart();
     renderApp();
-    
-    // Устанавливаем текущую дату в поле ввода по умолчанию
     setDefaultDate();
 
-    // Слушатели событий
-    const form = document.getElementById('bpForm');
-    if (form) form.addEventListener('submit', handleFormSubmit);
-
-    // Слушатель темы
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-        themeToggle.checked = AppState.isDarkMode;
-        themeToggle.addEventListener('change', toggleTheme);
+    // Слушатели
+    document.getElementById('bpForm').addEventListener('submit', handleFormSubmit);
+    
+    // Переключатель темы
+    const toggle = document.getElementById('themeToggle');
+    if(toggle) {
+        toggle.checked = AppState.isDarkMode;
+        toggle.addEventListener('change', (e) => {
+            toggleTheme(e.target.checked);
+        });
     }
 });
 
 function setDefaultDate() {
     const now = new Date();
-    // Формат для input type="datetime-local" должен быть YYYY-MM-DDTHH:MM
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     document.getElementById('dateInput').value = now.toISOString().slice(0, 16);
 }
 
-// --- Хранилище ---
+// --- LocalStorage ---
 function saveData() {
-    localStorage.setItem('cardioLogData_v2', JSON.stringify(AppState));
+    localStorage.setItem('cardioPro_v1', JSON.stringify(AppState));
     renderApp();
 }
 
 function loadData() {
-    const rawData = localStorage.getItem('cardioLogData_v2');
+    const rawData = localStorage.getItem('cardioPro_v1');
     if (rawData) {
         const parsed = JSON.parse(rawData);
         AppState.userName = parsed.userName || "Пользователь";
         AppState.records = parsed.records || [];
         AppState.isDarkMode = parsed.isDarkMode || false;
     }
-    // Применяем тему сразу
-    applyTheme();
+    applyTheme(AppState.isDarkMode);
 }
 
 function clearAllData() {
-    if (confirm("Удалить всю историю?")) {
+    if (confirm("Вы уверены? История будет удалена.")) {
         AppState.records = [];
         saveData();
     }
 }
 
-// --- Тёмная тема ---
-function toggleTheme(e) {
-    AppState.isDarkMode = e.target.checked;
-    applyTheme();
-    saveData(); // Сохраняем настройку
+// --- Theme Logic ---
+function toggleTheme(isChecked) {
+    AppState.isDarkMode = isChecked;
+    applyTheme(isChecked);
+    saveData();
+    updateChartTheme(); // Важно: обновляем цвета графика
 }
 
-function applyTheme() {
-    if (AppState.isDarkMode) {
+function applyTheme(isDark) {
+    if (isDark) {
         document.body.classList.add('dark-mode');
     } else {
         document.body.classList.remove('dark-mode');
     }
 }
 
-// --- Логика формы ---
+// --- Form Logic ---
 function handleFormSubmit(e) {
     e.preventDefault();
-
     const dateVal = document.getElementById('dateInput').value;
-    const sysVal = document.getElementById('sysInput').value;
-    const diaVal = document.getElementById('diaInput').value; // Может быть пустым
-    const pulseVal = document.getElementById('pulseInput').value; // Может быть пустым
-    const noteVal = document.getElementById('noteInput').value;
+    const sys = document.getElementById('sysInput').value;
+    const dia = document.getElementById('diaInput').value;
+    const pulse = document.getElementById('pulseInput').value;
+    const note = document.getElementById('noteInput').value;
 
-    if (!sysVal) {
-        alert("Укажите хотя бы верхнее давление (SYS)");
-        return;
-    }
-
-    // Создаем дату из инпута
-    const recordDate = new Date(dateVal);
+    if (!sys) return;
 
     const newRecord = {
         id: Date.now(),
-        timestamp: recordDate.getTime(),
-        // Сохраняем значения или null, если пусто
-        sys: parseInt(sysVal),
-        dia: diaVal ? parseInt(diaVal) : null,
-        pulse: pulseVal ? parseInt(pulseVal) : null,
-        note: noteVal || ""
+        timestamp: new Date(dateVal).getTime(),
+        sys: parseInt(sys),
+        dia: dia ? parseInt(dia) : null,
+        pulse: pulse ? parseInt(pulse) : null,
+        note: note || ""
     };
 
     AppState.records.push(newRecord);
     saveData();
-
     e.target.reset();
-    setDefaultDate(); // Возвращаем дату на текущую
+    setDefaultDate();
 }
 
 function deleteRecord(id) {
-    if (confirm("Удалить запись?")) {
+    if(confirm("Удалить?")) {
         AppState.records = AppState.records.filter(r => r.id !== id);
         saveData();
     }
 }
 
-// --- Интерфейс ---
+// --- UI Logic ---
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
-    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active-tab');
+    document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
     
-    // Подсветка кнопки (простая)
+    document.getElementById(tabId).classList.add('active-tab');
+    // Простая подсветка кнопок
     const btns = document.querySelectorAll('.nav-btn');
-    if (tabId === 'dashboard') btns[0].classList.add('active');
-    if (tabId === 'history') btns[1].classList.add('active');
-    if (tabId === 'settings') btns[2].classList.add('active');
+    if(tabId === 'dashboard') btns[0].classList.add('active');
+    if(tabId === 'history') btns[1].classList.add('active');
+    if(tabId === 'settings') btns[2].classList.add('active');
 }
 
 function editName() {
@@ -140,86 +128,78 @@ function editName() {
 }
 
 function saveSettings() {
-    const input = document.getElementById('settingsNameInput');
-    if (input.value.trim()) {
-        AppState.userName = input.value.trim();
+    const val = document.getElementById('settingsNameInput').value;
+    if(val.trim()) {
+        AppState.userName = val.trim();
         saveData();
-        alert("Сохранено");
+        alert('Сохранено');
     }
 }
 
-// --- Рендер ---
+// --- Render ---
 function renderApp() {
     document.getElementById('userNameDisplay').innerText = AppState.userName;
 
-    // Сортируем записи
-    const sortedForChart = [...AppState.records].sort((a, b) => a.timestamp - b.timestamp);
-    const sortedForTable = [...AppState.records].sort((a, b) => b.timestamp - a.timestamp);
+    const sortedForChart = [...AppState.records].sort((a,b) => a.timestamp - b.timestamp);
+    const sortedForTable = [...AppState.records].sort((a,b) => b.timestamp - a.timestamp);
 
-    renderStatusWidget(sortedForChart);
-    renderHistoryTable(sortedForTable);
-    updateChart(sortedForChart);
+    renderStatus(sortedForChart);
+    renderTable(sortedForTable);
+    updateChartData(sortedForChart);
 }
 
-function renderStatusWidget(records) {
-    const statusDiv = document.getElementById('statusDisplay');
+function renderStatus(records) {
+    const div = document.getElementById('statusDisplay');
     if (records.length === 0) {
-        statusDiv.innerHTML = `<span class="text-muted">Нет данных</span>`;
+        div.innerHTML = `<span style="color:var(--text-muted)">Нет данных</span>`;
         return;
     }
-
     const last = records[records.length - 1];
-    // Если нижнего нет, показываем прочерк
-    const diaDisplay = last.dia ? last.dia : '-';
-    const cat = getCategory(last.sys, last.dia || 80); // Если диа нет, оцениваем только по сис
+    const cat = getCategory(last.sys, last.dia || 80);
+    const diaDisplay = last.dia ? last.dia : '--';
 
-    // Форматируем дату красиво для виджета
-    const dateObj = new Date(last.timestamp);
-    const dateStr = dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-
-    statusDiv.innerHTML = `
-        <div class="bp-big" style="color: ${cat.color}">${last.sys} / ${diaDisplay}</div>
-        <div class="badge" style="background: ${cat.bg}; color: ${cat.color}; margin-top:5px;">${cat.text}</div>
-        <div style="margin-top: 10px; color: var(--text-muted); font-size: 14px;">
-            Пульс: <b>${last.pulse || '-'}</b> • ${dateStr}
+    div.innerHTML = `
+        <div class="bp-big" style="color: ${cat.color}">${last.sys}<span style="font-size:30px; color:var(--text-muted)">/</span>${diaDisplay}</div>
+        <div class="bp-label" style="background:${cat.bg}; color:${cat.textCol}">${cat.text}</div>
+        <div style="margin-top:12px; font-size:14px; color:var(--text-muted)">
+            Пульс: <strong style="color:var(--text-main)">${last.pulse || '--'}</strong>
         </div>
     `;
 }
 
-function renderHistoryTable(records) {
+function renderTable(records) {
     const tbody = document.getElementById('fullHistoryBody');
     tbody.innerHTML = '';
+    
+    records.forEach(r => {
+        const d = new Date(r.timestamp);
+        const dateStr = d.toLocaleDateString('ru-RU', {day:'numeric', month:'short'});
+        const timeStr = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        const cat = getCategory(r.sys, r.dia || 80);
 
-    records.forEach(rec => {
-        const dateObj = new Date(rec.timestamp);
-        const dateStr = dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
-        const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        const diaDisplay = rec.dia ? rec.dia : '-';
-        const pulseDisplay = rec.pulse ? rec.pulse : '-';
-        const cat = getCategory(rec.sys, rec.dia || 80);
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><div>${dateStr}</div><div style="font-size:12px; color:var(--text-muted)">${timeStr}</div></td>
-            <td><b>${rec.sys} / ${diaDisplay}</b></td>
-            <td>${pulseDisplay}</td>
-            <td><span class="badge" style="background:${cat.bg}; color:${cat.color}">${cat.text}</span></td>
-            <td style="color:var(--text-muted); font-size:13px;">${rec.note}</td>
-            <td><button class="btn-delete" onclick="deleteRecord(${rec.id})">✕</button></td>
+        const row = `
+            <tr>
+                <td><b>${dateStr}</b> <span style="color:var(--text-muted); font-size:12px; margin-left:5px">${timeStr}</span></td>
+                <td><span style="font-weight:700; font-size:16px">${r.sys}</span> / ${r.dia || '--'}</td>
+                <td>${r.pulse || '-'}</td>
+                <td><span style="color:${cat.color}; font-weight:600; font-size:12px">● ${cat.text}</span></td>
+                <td style="color:var(--text-muted); font-size:13px">${r.note}</td>
+                <td><button class="btn-delete" onclick="deleteRecord(${r.id})">✕</button></td>
+            </tr>
         `;
-        tbody.appendChild(row);
+        tbody.innerHTML += row;
     });
 }
 
-// --- График ---
+// --- Chart.js ---
 function initChart() {
     const ctx = document.getElementById('pressureChart');
     if(!ctx) return;
-    
-    // Получаем стили из CSS переменных для правильного цвета в темной теме
-    const style = getComputedStyle(document.body);
-    const gridColor = style.getPropertyValue('--border-color').trim();
+
+    // Получаем текущие цвета из CSS
+    const styles = getComputedStyle(document.body);
+    const gridColor = styles.getPropertyValue('--border').trim();
+    const textColor = styles.getPropertyValue('--text-muted').trim();
 
     pressureChartInstance = new Chart(ctx, {
         type: 'line',
@@ -227,67 +207,78 @@ function initChart() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            spanGaps: false, // Разрывать линию, если нет данных (dia = null)
+            interaction: { mode: 'index', intersect: false },
             plugins: { legend: { display: false } },
             scales: {
-                y: { grid: { color: gridColor }, suggestedMin: 60, suggestedMax: 160 },
-                x: { grid: { display: false } }
+                x: {
+                    grid: { display: false },
+                    ticks: { color: textColor }
+                },
+                y: {
+                    grid: { color: gridColor },
+                    ticks: { color: textColor },
+                    suggestedMin: 50,
+                    suggestedMax: 160
+                }
             }
         }
     });
 }
 
-function updateChart(records) {
-    if (!pressureChartInstance) return;
+function updateChartTheme() {
+    if(!pressureChartInstance) return;
     
-    // Берем последние 15 записей
-    const recent = records.slice(-15);
-    
-    const labels = recent.map(r => {
-        const d = new Date(r.timestamp);
-        return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'numeric' });
-    });
+    const styles = getComputedStyle(document.body);
+    const gridColor = styles.getPropertyValue('--border').trim();
+    const textColor = styles.getPropertyValue('--text-muted').trim();
 
-    pressureChartInstance.data.labels = labels;
-    
-    // SYS Data
-    pressureChartInstance.data.datasets[0] = {
-        label: 'SYS',
-        data: recent.map(r => r.sys),
-        borderColor: '#E53935',
-        backgroundColor: 'rgba(229, 57, 53, 0.1)',
-        borderWidth: 3,
-        pointBackgroundColor: '#fff',
-        pointBorderColor: '#E53935',
-        tension: 0.3,
-        fill: true
-    };
-
-    // DIA Data (может содержать null)
-    const style = getComputedStyle(document.body);
-    const diaColor = style.getPropertyValue('--text-dark').trim();
-
-    pressureChartInstance.data.datasets[1] = {
-        label: 'DIA',
-        data: recent.map(r => r.dia), // null сработает корректно
-        borderColor: diaColor,
-        backgroundColor: 'transparent',
-        borderWidth: 2,
-        borderDash: [5, 5],
-        tension: 0.3,
-        pointRadius: 3
-    };
-
-    // Обновляем цвет сетки при смене темы
-    const gridColor = style.getPropertyValue('--border-color').trim();
+    // Обновляем настройки осей
     pressureChartInstance.options.scales.y.grid.color = gridColor;
-
+    pressureChartInstance.options.scales.y.ticks.color = textColor;
+    pressureChartInstance.options.scales.x.ticks.color = textColor;
+    
     pressureChartInstance.update();
 }
 
+function updateChartData(records) {
+    if(!pressureChartInstance) return;
+    const recent = records.slice(-10); // Последние 10 точек
+
+    pressureChartInstance.data.labels = recent.map(r => {
+        return new Date(r.timestamp).toLocaleDateString('ru-RU', {day:'numeric', month:'numeric'});
+    });
+
+    pressureChartInstance.data.datasets = [
+        {
+            label: 'SYS',
+            data: recent.map(r => r.sys),
+            borderColor: '#E53935',
+            backgroundColor: 'rgba(229, 57, 53, 0.1)',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 4,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: '#E53935'
+        },
+        {
+            label: 'DIA',
+            data: recent.map(r => r.dia),
+            borderColor: AppState.isDarkMode ? '#9E9E9E' : '#667085',
+            borderWidth: 2,
+            borderDash: [6, 6],
+            tension: 0.4,
+            pointRadius: 0
+        }
+    ];
+    
+    // Обновить цвета темы перед рендером
+    updateChartTheme();
+}
+
 function getCategory(sys, dia) {
-    if (sys > 180 || dia > 110) return { text: 'КРИТИЧЕСКОЕ', color: '#D32F2F', bg: '#FFEBEE' };
-    if (sys >= 140 || dia >= 90) return { text: 'Гипертония', color: '#F57C00', bg: '#FFF3E0' };
-    if (sys >= 120) return { text: 'Повышенное', color: '#FBC02D', bg: '#FFFDE7' };
-    return { text: 'Норма', color: '#388E3C', bg: '#E8F5E9' };
+    if (sys > 180 || dia > 110) return { text: 'КРИЗ', color: '#F04438', bg: '#FEF3F2', textCol: '#B42318' };
+    if (sys >= 140 || dia >= 90) return { text: 'Высокое', color: '#F79009', bg: '#FFFAEB', textCol: '#B54708' };
+    if (sys >= 120) return { text: 'Повышенное', color: '#FDB022', bg: '#FFFAEB', textCol: '#B54708' };
+    return { text: 'Норма', color: '#12B76A', bg: '#ECFDF3', textCol: '#027A48' };
 }
