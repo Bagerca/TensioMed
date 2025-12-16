@@ -1,0 +1,254 @@
+:root {
+    --primary-red: #E53935;       /* Профессиональный медицинский красный */
+    --primary-hover: #D32F2F;
+    --bg-color: #F4F6F8;          /* Светло-серый фон (Стерильность) */
+    --card-bg: #FFFFFF;
+    --text-dark: #2C3E50;
+    --text-light: #7F8C8D;
+    --border-color: #E0E0E0;
+    
+    --success: #43A047; /* Зеленый для нормы */
+    --warning: #FB8C00; /* Оранжевый для повышенного */
+    --danger: #E53935;  /* Красный для опасного */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-dark);
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background: var(--card-bg);
+    border-right: 1px solid var(--border-color);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 20px;
+    margin-bottom: 40px;
+    color: var(--primary-red);
+}
+
+.heart-icon {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.nav-links a {
+    display: block;
+    padding: 12px 15px;
+    color: var(--text-light);
+    text-decoration: none;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: 0.3s;
+}
+
+.nav-links a.active, .nav-links a:hover {
+    background-color: #FFEBEE; /* Очень светлый красный */
+    color: var(--primary-red);
+    font-weight: 600;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+h1 {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-dark);
+}
+
+/* Grid Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 20px;
+}
+
+/* Cards */
+.card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); /* Мягкая тень */
+    border: 1px solid transparent;
+    transition: 0.3s;
+}
+
+.card:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* Forms */
+.input-card {
+    grid-column: 1 / 2;
+}
+
+.status-card {
+    grid-column: 2 / 3;
+    display: flex;
+    flex-direction: column;
+}
+
+#bpForm {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group.full-width {
+    grid-column: 1 / -1;
+}
+
+label {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+input {
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    transition: 0.2s;
+}
+
+input:focus {
+    border-color: var(--primary-red);
+    box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.1);
+}
+
+.btn-primary {
+    grid-column: 1 / -1;
+    background-color: var(--primary-red);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Status Display */
+.status-display {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.bp-big-number {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.bp-label {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+/* Chart */
+.chart-card {
+    grid-column: 1 / -1;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.chart-container {
+    height: 300px;
+    width: 100%;
+}
+
+.legend .dot {
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 15px;
+}
+.dot.sys { background-color: var(--primary-red); }
+.dot.dia { background-color: #2C3E50; }
+
+/* Table */
+.history-card {
+    grid-column: 1 / -1;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    color: var(--text-light);
+    font-weight: 500;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+td {
+    padding: 15px 0;
+    border-bottom: 1px solid var(--bg-color);
+    font-size: 15px;
+}
