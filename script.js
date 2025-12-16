@@ -1,6 +1,5 @@
 /**
  * CardioLog Pro - Logic v5
- * С кнопкой скачивания, умным статусом и кастомными инпутами
  */
 
 const AppState = {
@@ -11,13 +10,11 @@ const AppState = {
 
 let pressureChartInstance = null;
 
-// --- Инициализация ---
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     initChart();
     renderApp();
     setDefaultDate();
-
     document.getElementById('bpForm').addEventListener('submit', handleFormSubmit);
     
     const toggle = document.getElementById('themeToggle');
@@ -33,7 +30,6 @@ function setDefaultDate() {
     document.getElementById('dateInput').value = now.toISOString().slice(0, 16);
 }
 
-// --- Хранение ---
 function saveData() {
     localStorage.setItem('cardioPro_v5', JSON.stringify(AppState));
     renderApp();
@@ -51,13 +47,12 @@ function loadData() {
 }
 
 function clearAllData() {
-    if (confirm("Вы уверены? История будет удалена навсегда.")) {
+    if (confirm("Вы уверены?")) {
         AppState.records = [];
         saveData();
     }
 }
 
-// --- Тема ---
 function toggleTheme(isChecked) {
     AppState.isDarkMode = isChecked;
     applyTheme(isChecked);
@@ -70,7 +65,6 @@ function applyTheme(isDark) {
     else document.body.classList.remove('dark-mode');
 }
 
-// --- Форма и Кнопки +/- ---
 function handleFormSubmit(e) {
     e.preventDefault();
     const dateVal = document.getElementById('dateInput').value;
@@ -99,14 +93,12 @@ function handleFormSubmit(e) {
 function adjustValue(id, step) {
     const el = document.getElementById(id);
     let val = parseInt(el.value);
-    
     if (isNaN(val)) {
         if (id === 'sysInput') val = 120;
         else if (id === 'diaInput') val = 80;
         else if (id === 'pulseInput') val = 60;
         else val = 0;
     }
-
     val += step;
     if (val < 0) val = 0;
     el.value = val;
@@ -119,7 +111,6 @@ function deleteRecord(id) {
     }
 }
 
-// --- Табы и Профиль ---
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
     document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -145,7 +136,6 @@ function saveSettings() {
     }
 }
 
-// --- Рендеринг ---
 function renderApp() {
     document.getElementById('userNameDisplay').innerText = AppState.userName;
 
@@ -157,10 +147,8 @@ function renderApp() {
     updateChartData(sortedForChart);
 }
 
-// Умный статус (Сегодня или Среднее)
 function renderStatus(records) {
     const div = document.getElementById('statusDisplay');
-    
     if (records.length === 0) {
         div.innerHTML = `<span style="color:var(--text-muted)">Нет данных</span>`;
         return;
@@ -251,7 +239,6 @@ function renderTable(records) {
     });
 }
 
-// --- Графики ---
 function initChart() {
     const ctx = document.getElementById('pressureChart');
     if(!ctx) return;
@@ -314,7 +301,6 @@ function getCategory(sys, dia) {
     return { text: 'Норма', color: '#12B76A', bg: '#ECFDF3', textCol: '#027A48' };
 }
 
-// --- СКАЧИВАНИЕ ОТЧЕТА ---
 async function downloadReport() {
     const dashboard = document.querySelector('.dashboard-grid');
     const btn = document.querySelector('.btn-icon-action');
