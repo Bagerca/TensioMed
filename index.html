@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CardioLog Pro</title>
-    <!-- Шрифт Manrope для современного вида цифр -->
+    <!-- Шрифт Manrope -->
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <!-- Библиотека графиков -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-    <!-- Боковая панель -->
+    <!-- Сайдбар -->
     <nav class="sidebar">
         <div class="logo">
             <div class="heart-pulse-icon">
@@ -62,7 +62,7 @@
         </div>
     </nav>
 
-    <!-- Основной контент -->
+    <!-- Контент -->
     <main class="main-content">
         <header>
             <div>
@@ -80,11 +80,11 @@
             </div>
         </header>
 
-        <!-- DASHBOARD TAB -->
+        <!-- DASHBOARD -->
         <div id="dashboard" class="tab-content active-tab">
             <div class="dashboard-grid">
                 
-                <!-- Блок статуса с ИСПРАВЛЕННОЙ АНИМАЦИЕЙ -->
+                <!-- Анимация пульса -->
                 <section class="card status-card">
                     <div class="card-header-simple">
                         <h2>Текущее состояние</h2>
@@ -92,7 +92,6 @@
                     </div>
                     
                     <div class="ecg-wrapper">
-                        <!-- Широкий viewBox для плавности и центрированный зубец -->
                         <svg class="ecg-svg" viewBox="0 0 600 100" preserveAspectRatio="none">
                             <polyline points="0,50 240,50 250,65 265,10 280,90 295,50 600,50" 
                                       class="ecg-line"></polyline>
@@ -104,32 +103,49 @@
                     </div>
                 </section>
 
-                <!-- Форма ввода -->
+                <!-- Ввод данных (С новыми кнопками) -->
                 <section class="card input-card">
                     <h2>Новая запись</h2>
                     <form id="bpForm">
                         <div class="input-group full-width" style="margin-bottom: 20px;">
                             <label>Дата измерения</label>
-                            <input type="datetime-local" id="dateInput" required>
+                            <input type="datetime-local" id="dateInput" class="std-input" required>
                         </div>
 
                         <div class="input-row-3">
+                            <!-- SYS (Шаг 5) -->
                             <div class="input-group">
                                 <label>SYS <small>(Верх)</small></label>
-                                <input type="number" id="sysInput" placeholder="120" required>
+                                <div class="custom-number-input">
+                                    <button type="button" class="spin-btn" onclick="adjustValue('sysInput', -5)">−</button>
+                                    <input type="number" id="sysInput" placeholder="120" required>
+                                    <button type="button" class="spin-btn" onclick="adjustValue('sysInput', 5)">+</button>
+                                </div>
                             </div>
+                            
+                            <!-- DIA (Шаг 5) -->
                             <div class="input-group">
                                 <label>DIA <small>(Низ)</small></label>
-                                <input type="number" id="diaInput" placeholder="-">
+                                <div class="custom-number-input">
+                                    <button type="button" class="spin-btn" onclick="adjustValue('diaInput', -5)">−</button>
+                                    <input type="number" id="diaInput" placeholder="-">
+                                    <button type="button" class="spin-btn" onclick="adjustValue('diaInput', 5)">+</button>
+                                </div>
                             </div>
+                            
+                            <!-- PULSE (Шаг 1) -->
                             <div class="input-group">
                                 <label>Пульс</label>
-                                <input type="number" id="pulseInput" placeholder="-">
+                                <div class="custom-number-input">
+                                    <button type="button" class="spin-btn" onclick="adjustValue('pulseInput', -1)">−</button>
+                                    <input type="number" id="pulseInput" placeholder="-">
+                                    <button type="button" class="spin-btn" onclick="adjustValue('pulseInput', 1)">+</button>
+                                </div>
                             </div>
                         </div>
                         
                         <div class="input-group full-width" style="margin-top: 15px;">
-                            <input type="text" id="noteInput" placeholder="Заметка (стресс, кофе, сон...)">
+                            <input type="text" id="noteInput" class="std-input" placeholder="Заметка (стресс, кофе, сон...)">
                         </div>
                         
                         <button type="submit" class="btn-primary">
@@ -150,7 +166,7 @@
             </div>
         </div>
 
-        <!-- HISTORY TAB -->
+        <!-- HISTORY -->
         <div id="history" class="tab-content">
             <section class="card">
                 <div class="card-header-row">
@@ -175,13 +191,13 @@
             </section>
         </div>
 
-        <!-- SETTINGS TAB -->
+        <!-- SETTINGS -->
         <div id="settings" class="tab-content">
             <section class="card settings-card">
                 <h2>Профиль</h2>
                 <div class="input-group">
                     <label>Имя пользователя</label>
-                    <input type="text" id="settingsNameInput">
+                    <input type="text" id="settingsNameInput" class="std-input">
                 </div>
                 <button class="btn-primary" onclick="saveSettings()">Сохранить</button>
             </section>
