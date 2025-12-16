@@ -1,3 +1,8 @@
+/**
+ * CardioLog Pro - Logic v3
+ * Добавлена поддержка кастомных кнопок (+/-)
+ */
+
 const AppState = {
     userName: "Пользователь",
     isDarkMode: false,
@@ -6,14 +11,17 @@ const AppState = {
 
 let pressureChartInstance = null;
 
+// --- Инициализация ---
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     initChart();
     renderApp();
     setDefaultDate();
 
+    // Слушатели событий
     document.getElementById('bpForm').addEventListener('submit', handleFormSubmit);
     
+    // Переключатель темы
     const toggle = document.getElementById('themeToggle');
     if(toggle) {
         toggle.checked = AppState.isDarkMode;
@@ -21,19 +29,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Установка даты с учетом часового пояса
 function setDefaultDate() {
     const now = new Date();
+    // Коррекция смещения часового пояса для input type="datetime-local"
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     document.getElementById('dateInput').value = now.toISOString().slice(0, 16);
 }
 
+// --- Хранение данных ---
 function saveData() {
-    localStorage.setItem('cardioPro_v2', JSON.stringify(AppState));
+    localStorage.setItem('cardioPro_v3', JSON.stringify(AppState));
     renderApp();
 }
 
 function loadData() {
-    const rawData = localStorage.getItem('cardioPro_v2');
+    const rawData = localStorage.getItem('cardioPro_v3');
     if (rawData) {
         const parsed = JSON.parse(rawData);
         AppState.userName = parsed.userName || "Пользователь";
@@ -44,17 +55,18 @@ function loadData() {
 }
 
 function clearAllData() {
-    if (confirm("Вы уверены? История будет удалена.")) {
+    if (confirm("Вы уверены? История будет удалена навсегда.")) {
         AppState.records = [];
         saveData();
     }
 }
 
+// --- Логика темы ---
 function toggleTheme(isChecked) {
     AppState.isDarkMode = isChecked;
     applyTheme(isChecked);
     saveData();
-    updateChartTheme();
+    updateChartTheme(); // Важно: перекрасить график
 }
 
 function applyTheme(isDark) {
@@ -62,6 +74,7 @@ function applyTheme(isDark) {
     else document.body.classList.remove('dark-mode');
 }
 
+// --- Логика формы и ввода ---
 function handleFormSubmit(e) {
     e.preventDefault();
     const dateVal = document.getElementById('dateInput').value;
@@ -87,22 +100,41 @@ function handleFormSubmit(e) {
     setDefaultDate();
 }
 
+// Функция для кастомных кнопок +/-
+function adjustValue(id, step) {
+    const el = document.getElementById(id);
+    let val = parseInt(el.value);
+    
+    // Если поле пустое, берем разумный старт
+    if (isNaN(val)) {
+        if (id === 'sysInput') val = 120;
+        else if (id === 'diaInput') val = 80;
+        else if (id === 'pulseInput') val = 60;
+        else val = 0;
+    }
+
+    val += step;
+    
+    // Защита от отрицательных значений
+    if (val < 0) val = 0;
+    
+    el.value = val;
+}
+
 function deleteRecord(id) {
-    if(confirm("Удалить?")) {
+    if(confirm("Удалить запись?")) {
         AppState.records = AppState.records.filter(r => r.id !== id);
         saveData();
     }
 }
 
+// --- Навигация (Табы) ---
 function switchTab(tabId) {
-    // Скрываем все вкладки
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
     document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
     
-    // Показываем нужную
     document.getElementById(tabId).classList.add('active-tab');
     
-    // Подсветка кнопок
     const btns = document.querySelectorAll('.nav-btn');
     if(tabId === 'dashboard') btns[0].classList.add('active');
     if(tabId === 'history') btns[1].classList.add('active');
@@ -123,6 +155,7 @@ function saveSettings() {
     }
 }
 
+// --- Рендеринг ---
 function renderApp() {
     document.getElementById('userNameDisplay').innerText = AppState.userName;
 
@@ -177,6 +210,7 @@ function renderTable(records) {
     });
 }
 
+// --- Chart.js ---
 function initChart() {
     const ctx = document.getElementById('pressureChart');
     if(!ctx) return;
@@ -232,6 +266,7 @@ function updateChartData(records) {
     updateChartTheme();
 }
 
+// --- Категории (ВОЗ) ---
 function getCategory(sys, dia) {
     if (sys > 180 || dia > 110) return { text: 'КРИЗ', color: '#F04438', bg: '#FEF3F2', textCol: '#B42318' };
     if (sys >= 140 || dia >= 90) return { text: 'Высокое', color: '#F79009', bg: '#FFFAEB', textCol: '#B54708' };
