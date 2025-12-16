@@ -1,6 +1,6 @@
 /**
- * CardioLog Pro - Logic v3
- * Добавлена поддержка кастомных кнопок (+/-)
+ * CardioLog Pro - Logic v4
+ * Добавлена логика "Умного статуса" (Среднее за 7 дней)
  */
 
 const AppState = {
@@ -11,17 +11,14 @@ const AppState = {
 
 let pressureChartInstance = null;
 
-// --- Инициализация ---
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     initChart();
     renderApp();
     setDefaultDate();
 
-    // Слушатели событий
     document.getElementById('bpForm').addEventListener('submit', handleFormSubmit);
     
-    // Переключатель темы
     const toggle = document.getElementById('themeToggle');
     if(toggle) {
         toggle.checked = AppState.isDarkMode;
@@ -29,22 +26,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Установка даты с учетом часового пояса
 function setDefaultDate() {
     const now = new Date();
-    // Коррекция смещения часового пояса для input type="datetime-local"
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     document.getElementById('dateInput').value = now.toISOString().slice(0, 16);
 }
 
-// --- Хранение данных ---
 function saveData() {
-    localStorage.setItem('cardioPro_v3', JSON.stringify(AppState));
+    localStorage.setItem('cardioPro_v4', JSON.stringify(AppState));
     renderApp();
 }
 
 function loadData() {
-    const rawData = localStorage.getItem('cardioPro_v3');
+    const rawData = localStorage.getItem('cardioPro_v4');
     if (rawData) {
         const parsed = JSON.parse(rawData);
         AppState.userName = parsed.userName || "Пользователь";
@@ -61,12 +55,11 @@ function clearAllData() {
     }
 }
 
-// --- Логика темы ---
 function toggleTheme(isChecked) {
     AppState.isDarkMode = isChecked;
     applyTheme(isChecked);
     saveData();
-    updateChartTheme(); // Важно: перекрасить график
+    updateChartTheme();
 }
 
 function applyTheme(isDark) {
@@ -74,7 +67,6 @@ function applyTheme(isDark) {
     else document.body.classList.remove('dark-mode');
 }
 
-// --- Логика формы и ввода ---
 function handleFormSubmit(e) {
     e.preventDefault();
     const dateVal = document.getElementById('dateInput').value;
@@ -100,12 +92,10 @@ function handleFormSubmit(e) {
     setDefaultDate();
 }
 
-// Функция для кастомных кнопок +/-
 function adjustValue(id, step) {
     const el = document.getElementById(id);
     let val = parseInt(el.value);
     
-    // Если поле пустое, берем разумный старт
     if (isNaN(val)) {
         if (id === 'sysInput') val = 120;
         else if (id === 'diaInput') val = 80;
@@ -114,10 +104,7 @@ function adjustValue(id, step) {
     }
 
     val += step;
-    
-    // Защита от отрицательных значений
     if (val < 0) val = 0;
-    
     el.value = val;
 }
 
@@ -128,11 +115,9 @@ function deleteRecord(id) {
     }
 }
 
-// --- Навигация (Табы) ---
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
     document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-    
     document.getElementById(tabId).classList.add('active-tab');
     
     const btns = document.querySelectorAll('.nav-btn');
@@ -155,35 +140,99 @@ function saveSettings() {
     }
 }
 
-// --- Рендеринг ---
 function renderApp() {
     document.getElementById('userNameDisplay').innerText = AppState.userName;
 
     const sortedForChart = [...AppState.records].sort((a,b) => a.timestamp - b.timestamp);
     const sortedForTable = [...AppState.records].sort((a,b) => b.timestamp - a.timestamp);
 
-    renderStatus(sortedForChart);
+    renderStatus(sortedForChart); // Обновленная функция
     renderTable(sortedForTable);
     updateChartData(sortedForChart);
 }
 
+// --- НОВАЯ ЛОГИКА СТАТУСА (СРЕДНЕЕ ИЛИ ТЕКУЩЕЕ) ---
 function renderStatus(records) {
     const div = document.getElementById('statusDisplay');
+    
     if (records.length === 0) {
         div.innerHTML = `<span style="color:var(--text-muted)">Нет данных</span>`;
         return;
     }
-    const last = records[records.length - 1];
-    const cat = getCategory(last.sys, last.dia || 80);
-    const diaDisplay = last.dia ? last.dia : '--';
 
+    const lastRecord = records[records.length - 1];
+    const now = new Date();
+    const lastDate = new Date(lastRecord.timestamp);
+    
+    // Проверяем, была ли запись СЕГОДНЯ
+    const isToday = now.getDate() === lastDate.getDate() && 
+                    now.getMonth() === lastDate.getMonth() && 
+                    now.getFullYear() === lastDate.getFullYear();
+
+    let displaySys, displayDia, displayPulse, labelText, badgeColor;
+
+    if (isToday) {
+        // Если есть запись сегодня - показываем её
+        displaySys = lastRecord.sys;
+        displayDia = lastRecord.dia || '--';
+        displayPulse = lastRecord.pulse || '--';
+        
+        const cat = getCategory(displaySys, lastRecord.dia || 80);
+        labelText = "Последний замер (Сегодня)";
+        badgeColor = cat; // Цвет берем из категории
+        
+    } else {
+        // Если сегодня записей нет - считаем СРЕДНЕЕ за 7 дней
+        const stats = calculateAverageStats(records, 7);
+        displaySys = stats.sys;
+        displayDia = stats.dia;
+        displayPulse = stats.pulse;
+        
+        const cat = getCategory(displaySys, stats.dia === '--' ? 80 : stats.dia);
+        labelText = "Среднее за 7 дней";
+        badgeColor = cat;
+    }
+
+    // Рендерим HTML
     div.innerHTML = `
-        <div class="bp-big" style="color: ${cat.color}">${last.sys}<span style="font-size:30px; color:var(--text-muted)">/</span>${diaDisplay}</div>
-        <div class="bp-label" style="background:${cat.bg}; color:${cat.textCol}">${cat.text}</div>
+        <div class="bp-big" style="color: ${badgeColor.color}">
+            ${displaySys}<span style="font-size:30px; color:var(--text-muted)">/</span>${displayDia}
+        </div>
+        <div class="bp-label" style="background:${badgeColor.bg}; color:${badgeColor.textCol}">
+            ${badgeColor.text}
+        </div>
         <div style="margin-top:12px; font-size:14px; color:var(--text-muted)">
-            Пульс: <strong style="color:var(--text-main)">${last.pulse || '--'}</strong>
+            <span style="display:block; margin-bottom:4px; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; opacity:0.7">${labelText}</span>
+            Пульс: <strong style="color:var(--text-main)">${displayPulse}</strong>
         </div>
     `;
+}
+
+// Вспомогательная функция для расчета среднего
+function calculateAverageStats(records, days) {
+    const now = new Date().getTime();
+    const msInDay = 24 * 60 * 60 * 1000;
+    
+    // Фильтруем записи за последние N дней
+    const recentRecords = records.filter(r => (now - r.timestamp) < (days * msInDay));
+    
+    // Если записей за неделю нет, берем вообще все, что есть
+    const targetRecords = recentRecords.length > 0 ? recentRecords : records;
+
+    let sumSys = 0, sumDia = 0, sumPulse = 0;
+    let countDia = 0, countPulse = 0;
+
+    targetRecords.forEach(r => {
+        sumSys += r.sys;
+        if(r.dia) { sumDia += r.dia; countDia++; }
+        if(r.pulse) { sumPulse += r.pulse; countPulse++; }
+    });
+
+    return {
+        sys: Math.round(sumSys / targetRecords.length),
+        dia: countDia > 0 ? Math.round(sumDia / countDia) : '--',
+        pulse: countPulse > 0 ? Math.round(sumPulse / countPulse) : '--'
+    };
 }
 
 function renderTable(records) {
@@ -210,7 +259,6 @@ function renderTable(records) {
     });
 }
 
-// --- Chart.js ---
 function initChart() {
     const ctx = document.getElementById('pressureChart');
     if(!ctx) return;
@@ -266,7 +314,6 @@ function updateChartData(records) {
     updateChartTheme();
 }
 
-// --- Категории (ВОЗ) ---
 function getCategory(sys, dia) {
     if (sys > 180 || dia > 110) return { text: 'КРИЗ', color: '#F04438', bg: '#FEF3F2', textCol: '#B42318' };
     if (sys >= 140 || dia >= 90) return { text: 'Высокое', color: '#F79009', bg: '#FFFAEB', textCol: '#B54708' };
