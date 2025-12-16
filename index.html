@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CardioLog</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>CardioLog Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -12,70 +12,111 @@
 
     <nav class="sidebar">
         <div class="logo">
-            <div class="heart-icon">❤</div>
+            <div class="heart-pulse-icon">
+                <!-- SVG иконка с маленьким пульсом -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 7.65l.77.78 7.65 7.65 7.65-7.65.77-.78a5.4 5.4 0 0 0 0-7.65z"></path>
+                    <path d="M5.5 11h.58a2 2 0 0 1 1.95 1.57l.6 2.3 1.1-4.72a2 2 0 0 1 3.88 0l.47 1.63a2 2 0 0 0 1.92 1.45h1"></path>
+                </svg>
+            </div>
             <span>CardioLog</span>
         </div>
+        
         <div class="nav-links">
-            <button class="nav-btn active" onclick="switchTab('dashboard')">Главная</button>
-            <button class="nav-btn" onclick="switchTab('history')">Журнал</button>
-            <button class="nav-btn" onclick="switchTab('settings')">Настройки</button>
+            <button class="nav-btn active" onclick="switchTab('dashboard')">
+                <span class="icon">📊</span> Главная
+            </button>
+            <button class="nav-btn" onclick="switchTab('history')">
+                <span class="icon">📅</span> Журнал
+            </button>
+            <button class="nav-btn" onclick="switchTab('settings')">
+                <span class="icon">⚙️</span> Настройки
+            </button>
+        </div>
+
+        <div class="theme-toggle-container">
+            <label class="switch-label">Тёмная тема</label>
+            <label class="switch">
+                <input type="checkbox" id="themeToggle">
+                <span class="slider"></span>
+            </label>
         </div>
     </nav>
 
     <main class="main-content">
         <header>
-            <h1 id="pageTitle">Главная панель</h1>
-            <div class="user-profile" onclick="editName()" title="Изменить имя">
-                <span id="userNameDisplay">Пользователь</span> ✎
+            <div>
+                <h1 id="pageTitle">Обзор здоровья</h1>
+                <p class="subtitle">Мониторинг гемодинамики</p>
+            </div>
+            <div class="user-profile" onclick="editName()">
+                <div class="avatar-circle">👤</div>
+                <span id="userNameDisplay">Пользователь</span>
             </div>
         </header>
 
-        <!-- Вкладка: ДАШБОРД -->
+        <!-- DASHBOARD -->
         <div id="dashboard" class="tab-content active-tab">
             <div class="dashboard-grid">
                 
-                <section class="card input-card">
-                    <h2>Новая запись</h2>
-                    <form id="bpForm">
-                        <!-- Новое поле ДАТЫ -->
-                        <div class="input-group full-width" style="margin-bottom: 15px;">
-                            <label>Дата и время измерения</label>
-                            <input type="datetime-local" id="dateInput" required>
-                        </div>
-
-                        <div class="input-row">
-                            <div class="input-group">
-                                <label>SYS (Верх)</label>
-                                <input type="number" id="sysInput" placeholder="120" required min="50" max="300">
-                            </div>
-                            <div class="input-group">
-                                <label>DIA (Низ)</label>
-                                <!-- Убрали required -->
-                                <input type="number" id="diaInput" placeholder="-" min="30" max="200">
-                            </div>
-                            <div class="input-group">
-                                <label>Пульс</label>
-                                <!-- Убрали required -->
-                                <input type="number" id="pulseInput" placeholder="-" min="30" max="250">
-                            </div>
-                        </div>
-                        <div class="input-group full-width">
-                            <input type="text" id="noteInput" placeholder="Метка (опционально)">
-                        </div>
-                        <button type="submit" class="btn-primary">Записать</button>
-                    </form>
-                </section>
-
+                <!-- Блок статуса с АНИМАЦИЕЙ -->
                 <section class="card status-card">
-                    <h2>Последняя запись</h2>
+                    <div class="card-header-simple">
+                        <h2>Текущее состояние</h2>
+                        <span class="live-indicator">LIVE ●</span>
+                    </div>
+                    
+                    <div class="ecg-container">
+                        <!-- Линия кардиограммы (SVG) -->
+                        <svg class="ecg-svg" viewBox="0 0 500 100" preserveAspectRatio="none">
+                            <polyline points="0,50 100,50 120,20 140,80 160,50 200,50 250,50 300,50 320,20 340,80 360,50 400,50 500,50" 
+                                      class="ecg-line"></polyline>
+                        </svg>
+                    </div>
+
                     <div class="status-display" id="statusDisplay">
-                        <span class="text-muted">Нет данных</span>
+                        <span class="text-muted">Нет данных за сегодня</span>
                     </div>
                 </section>
 
+                <!-- Ввод данных -->
+                <section class="card input-card">
+                    <h2>Новая запись</h2>
+                    <form id="bpForm">
+                        <div class="input-group full-width" style="margin-bottom: 20px;">
+                            <label>Дата измерения</label>
+                            <input type="datetime-local" id="dateInput" required>
+                        </div>
+
+                        <div class="input-row-3">
+                            <div class="input-group">
+                                <label>SYS <small>(Верх)</small></label>
+                                <input type="number" id="sysInput" placeholder="120" required>
+                            </div>
+                            <div class="input-group">
+                                <label>DIA <small>(Низ)</small></label>
+                                <input type="number" id="diaInput" placeholder="-">
+                            </div>
+                            <div class="input-group">
+                                <label>Пульс</label>
+                                <input type="number" id="pulseInput" placeholder="-">
+                            </div>
+                        </div>
+                        
+                        <div class="input-group full-width" style="margin-top: 15px;">
+                            <input type="text" id="noteInput" placeholder="Заметка (стресс, кофе, сон...)">
+                        </div>
+                        
+                        <button type="submit" class="btn-primary">
+                            <span>ЗАПИСАТЬ ПОКАЗАТЕЛИ</span>
+                        </button>
+                    </form>
+                </section>
+
+                <!-- График -->
                 <section class="card chart-card">
                     <div class="chart-header">
-                        <h2>Динамика</h2>
+                        <h2>Динамика давления</h2>
                     </div>
                     <div class="chart-container">
                         <canvas id="pressureChart"></canvas>
@@ -84,49 +125,40 @@
             </div>
         </div>
 
-        <!-- Вкладка: ЖУРНАЛ -->
+        <!-- HISTORY -->
         <div id="history" class="tab-content">
             <section class="card">
                 <div class="card-header-row">
-                    <h2>История</h2>
-                    <button class="btn-secondary" onclick="clearAllData()">Очистить всё</button>
+                    <h2>Журнал измерений</h2>
+                    <button class="btn-text" onclick="clearAllData()">Очистить историю</button>
                 </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Дата</th>
-                            <th>Показатели</th>
-                            <th>Пульс</th>
-                            <th>Статус</th>
-                            <th>Заметка</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="fullHistoryBody"></tbody>
-                </table>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Время</th>
+                                <th>Давление</th>
+                                <th>Пульс</th>
+                                <th>Статус</th>
+                                <th>Заметка</th>
+                                <th style="text-align: right;">Действие</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fullHistoryBody"></tbody>
+                    </table>
+                </div>
             </section>
         </div>
 
-        <!-- Вкладка: НАСТРОЙКИ -->
+        <!-- SETTINGS -->
         <div id="settings" class="tab-content">
-            <section class="card" style="max-width: 500px;">
-                <h2>Настройки</h2>
-                
+            <section class="card settings-card">
+                <h2>Профиль</h2>
                 <div class="input-group">
-                    <label>Ваше имя</label>
-                    <input type="text" id="settingsNameInput" placeholder="Введите имя">
+                    <label>Имя пользователя</label>
+                    <input type="text" id="settingsNameInput">
                 </div>
-
-                <!-- Переключатель Темы -->
-                <div class="theme-switch-wrapper" style="margin-top: 20px; display: flex; align-items: center; justify-content: space-between;">
-                    <label>Тёмная тема</label>
-                    <label class="switch">
-                        <input type="checkbox" id="themeToggle">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-
-                <button class="btn-primary" style="margin-top: 25px;" onclick="saveSettings()">Сохранить</button>
+                <button class="btn-primary" onclick="saveSettings()">Сохранить</button>
             </section>
         </div>
 
