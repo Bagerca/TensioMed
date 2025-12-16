@@ -1,6 +1,6 @@
 /**
- * CardioLog Pro - Logic v4
- * Добавлена логика "Умного статуса" (Среднее за 7 дней)
+ * CardioLog Pro - Logic v5
+ * С кнопкой скачивания, умным статусом и кастомными инпутами
  */
 
 const AppState = {
@@ -11,6 +11,7 @@ const AppState = {
 
 let pressureChartInstance = null;
 
+// --- Инициализация ---
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     initChart();
@@ -32,13 +33,14 @@ function setDefaultDate() {
     document.getElementById('dateInput').value = now.toISOString().slice(0, 16);
 }
 
+// --- Хранение ---
 function saveData() {
-    localStorage.setItem('cardioPro_v4', JSON.stringify(AppState));
+    localStorage.setItem('cardioPro_v5', JSON.stringify(AppState));
     renderApp();
 }
 
 function loadData() {
-    const rawData = localStorage.getItem('cardioPro_v4');
+    const rawData = localStorage.getItem('cardioPro_v5');
     if (rawData) {
         const parsed = JSON.parse(rawData);
         AppState.userName = parsed.userName || "Пользователь";
@@ -55,6 +57,7 @@ function clearAllData() {
     }
 }
 
+// --- Тема ---
 function toggleTheme(isChecked) {
     AppState.isDarkMode = isChecked;
     applyTheme(isChecked);
@@ -67,6 +70,7 @@ function applyTheme(isDark) {
     else document.body.classList.remove('dark-mode');
 }
 
+// --- Форма и Кнопки +/- ---
 function handleFormSubmit(e) {
     e.preventDefault();
     const dateVal = document.getElementById('dateInput').value;
@@ -115,6 +119,7 @@ function deleteRecord(id) {
     }
 }
 
+// --- Табы и Профиль ---
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
     document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -140,18 +145,19 @@ function saveSettings() {
     }
 }
 
+// --- Рендеринг ---
 function renderApp() {
     document.getElementById('userNameDisplay').innerText = AppState.userName;
 
     const sortedForChart = [...AppState.records].sort((a,b) => a.timestamp - b.timestamp);
     const sortedForTable = [...AppState.records].sort((a,b) => b.timestamp - a.timestamp);
 
-    renderStatus(sortedForChart); // Обновленная функция
+    renderStatus(sortedForChart);
     renderTable(sortedForTable);
     updateChartData(sortedForChart);
 }
 
-// --- НОВАЯ ЛОГИКА СТАТУСА (СРЕДНЕЕ ИЛИ ТЕКУЩЕЕ) ---
+// Умный статус (Сегодня или Среднее)
 function renderStatus(records) {
     const div = document.getElementById('statusDisplay');
     
@@ -164,7 +170,6 @@ function renderStatus(records) {
     const now = new Date();
     const lastDate = new Date(lastRecord.timestamp);
     
-    // Проверяем, была ли запись СЕГОДНЯ
     const isToday = now.getDate() === lastDate.getDate() && 
                     now.getMonth() === lastDate.getMonth() && 
                     now.getFullYear() === lastDate.getFullYear();
@@ -172,28 +177,22 @@ function renderStatus(records) {
     let displaySys, displayDia, displayPulse, labelText, badgeColor;
 
     if (isToday) {
-        // Если есть запись сегодня - показываем её
         displaySys = lastRecord.sys;
         displayDia = lastRecord.dia || '--';
         displayPulse = lastRecord.pulse || '--';
-        
         const cat = getCategory(displaySys, lastRecord.dia || 80);
         labelText = "Последний замер (Сегодня)";
-        badgeColor = cat; // Цвет берем из категории
-        
+        badgeColor = cat;
     } else {
-        // Если сегодня записей нет - считаем СРЕДНЕЕ за 7 дней
         const stats = calculateAverageStats(records, 7);
         displaySys = stats.sys;
         displayDia = stats.dia;
         displayPulse = stats.pulse;
-        
         const cat = getCategory(displaySys, stats.dia === '--' ? 80 : stats.dia);
         labelText = "Среднее за 7 дней";
         badgeColor = cat;
     }
 
-    // Рендерим HTML
     div.innerHTML = `
         <div class="bp-big" style="color: ${badgeColor.color}">
             ${displaySys}<span style="font-size:30px; color:var(--text-muted)">/</span>${displayDia}
@@ -208,15 +207,10 @@ function renderStatus(records) {
     `;
 }
 
-// Вспомогательная функция для расчета среднего
 function calculateAverageStats(records, days) {
     const now = new Date().getTime();
     const msInDay = 24 * 60 * 60 * 1000;
-    
-    // Фильтруем записи за последние N дней
     const recentRecords = records.filter(r => (now - r.timestamp) < (days * msInDay));
-    
-    // Если записей за неделю нет, берем вообще все, что есть
     const targetRecords = recentRecords.length > 0 ? recentRecords : records;
 
     let sumSys = 0, sumDia = 0, sumPulse = 0;
@@ -238,13 +232,11 @@ function calculateAverageStats(records, days) {
 function renderTable(records) {
     const tbody = document.getElementById('fullHistoryBody');
     tbody.innerHTML = '';
-    
     records.forEach(r => {
         const d = new Date(r.timestamp);
         const dateStr = d.toLocaleDateString('ru-RU', {day:'numeric', month:'short'});
         const timeStr = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
         const cat = getCategory(r.sys, r.dia || 80);
-
         const row = `
             <tr>
                 <td><b>${dateStr}</b> <span style="color:var(--text-muted); font-size:12px; margin-left:5px">${timeStr}</span></td>
@@ -259,6 +251,7 @@ function renderTable(records) {
     });
 }
 
+// --- Графики ---
 function initChart() {
     const ctx = document.getElementById('pressureChart');
     if(!ctx) return;
@@ -319,4 +312,31 @@ function getCategory(sys, dia) {
     if (sys >= 140 || dia >= 90) return { text: 'Высокое', color: '#F79009', bg: '#FFFAEB', textCol: '#B54708' };
     if (sys >= 120) return { text: 'Повышенное', color: '#FDB022', bg: '#FFFAEB', textCol: '#B54708' };
     return { text: 'Норма', color: '#12B76A', bg: '#ECFDF3', textCol: '#027A48' };
+}
+
+// --- СКАЧИВАНИЕ ОТЧЕТА ---
+async function downloadReport() {
+    const dashboard = document.querySelector('.dashboard-grid');
+    const btn = document.querySelector('.btn-icon-action');
+    
+    dashboard.classList.add('printing-mode');
+    btn.style.display = 'none';
+
+    await new Promise(r => setTimeout(r, 100));
+
+    try {
+        const canvas = await html2canvas(dashboard, {
+            backgroundColor: AppState.isDarkMode ? '#121212' : '#F2F4F7',
+            scale: 2
+        });
+        const link = document.createElement('a');
+        link.download = `CardioReport_${new Date().toLocaleDateString()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } catch (err) {
+        console.error("Ошибка при создании скриншота:", err);
+    } finally {
+        dashboard.classList.remove('printing-mode');
+        btn.style.display = 'flex';
+    }
 }
