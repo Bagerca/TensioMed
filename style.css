@@ -8,12 +8,15 @@
     --text-muted: #667085;
     --border: #E4E7EC;
     --input-bg: #FFFFFF;
+    --btn-control-bg: #F9FAFB;
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
     
-    /* Цвета статусов */
     --color-success: #12B76A;
     --color-warning: #F79009;
     --color-danger: #F04438;
+
+    /* ВАЖНО: Говорим браузеру, что у нас есть светлая тема для нативных элементов */
+    color-scheme: light;
 }
 
 /* Тёмная тема */
@@ -26,7 +29,11 @@ body.dark-mode {
     --text-muted: #9E9E9E;
     --border: #333333;
     --input-bg: #2C2C2C;
+    --btn-control-bg: #333333;
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+
+    /* ВАЖНО: Переключаем нативные попапы (календарь) в темный режим */
+    color-scheme: dark;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -41,7 +48,7 @@ body {
     transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* --- ВКЛАДКИ (Исправлено) --- */
+/* --- TABS --- */
 .tab-content { display: none !important; }
 .tab-content.active-tab { display: block !important; animation: fadeEffect 0.3s; }
 @keyframes fadeEffect { from {opacity: 0;} to {opacity: 1;} }
@@ -57,207 +64,158 @@ body {
     justify-content: space-between;
     transition: background 0.3s ease, border 0.3s ease;
 }
-
 .logo {
-    display: flex;
-    align-items: center;
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--primary);
-    margin-bottom: 50px;
-    letter-spacing: -0.5px;
+    display: flex; align-items: center; font-size: 20px; font-weight: 800;
+    color: var(--primary); margin-bottom: 50px; letter-spacing: -0.5px;
 }
-
 .heart-pulse-icon {
-    margin-right: 12px;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--primary-soft);
-    border-radius: 8px;
-    color: var(--primary);
+    margin-right: 12px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    background: var(--primary-soft); border-radius: 8px; color: var(--primary);
 }
-
 .nav-links { flex: 1; }
-
 .nav-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    padding: 14px 16px;
-    border: none;
-    background: transparent;
-    color: var(--text-muted);
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    border-radius: 10px;
-    margin-bottom: 8px;
-    transition: 0.2s;
-    font-family: inherit;
+    width: 100%; display: flex; align-items: center; padding: 14px 16px;
+    border: none; background: transparent; color: var(--text-muted); font-size: 15px; font-weight: 600;
+    cursor: pointer; border-radius: 10px; margin-bottom: 8px; transition: 0.2s; font-family: inherit;
 }
 .nav-icon { width: 20px; height: 20px; margin-right: 12px; transition: 0.2s; }
 .nav-btn:hover { background: var(--bg-body); color: var(--text-main); }
 .nav-btn.active { background: var(--primary-soft); color: var(--primary); }
 
-/* --- MAIN CONTENT --- */
+/* --- MAIN --- */
 .main-content { flex: 1; padding: 40px; overflow-y: auto; }
-
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-}
-
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
 h1 { font-size: 24px; font-weight: 700; color: var(--text-main); }
 .subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
-
 .user-profile {
-    display: flex;
-    align-items: center;
-    background: var(--bg-card);
-    padding: 6px 16px 6px 6px;
-    border-radius: 50px;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: 0.2s;
+    display: flex; align-items: center; background: var(--bg-card); padding: 6px 16px 6px 6px;
+    border-radius: 50px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s;
 }
 .user-profile:hover { border-color: var(--primary); }
 .avatar-circle {
-    width: 32px; height: 32px;
-    background: var(--bg-body);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 10px;
-    color: var(--text-muted);
+    width: 32px; height: 32px; background: var(--bg-body); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; margin-right: 10px; color: var(--text-muted);
 }
 
-/* --- CARDS & GRID --- */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 24px;
-}
-
+/* --- GRID --- */
+.dashboard-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; }
 .card {
-    background: var(--bg-card);
-    border-radius: 16px;
-    padding: 24px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
+    background: var(--bg-card); border-radius: 16px; padding: 24px;
+    border: 1px solid var(--border); box-shadow: var(--shadow);
     transition: background 0.3s, border 0.3s, box-shadow 0.3s;
 }
-
 h2 { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 20px; }
 
-/* --- ECG ANIMATION (PULSE) - ЦЕНТРИРОВАННАЯ И СВЕТЯЩАЯСЯ --- */
-.status-card { 
-    grid-column: 1 / 2; 
-    position: relative; 
-    overflow: hidden; 
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 220px; 
-}
-
-.card-header-simple { 
-    display: flex; justify-content: space-between; align-items: center; 
-    z-index: 2; position: relative; margin-bottom: 10px;
-}
+/* --- PULSE ANIMATION --- */
+.status-card { grid-column: 1 / 2; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 220px; }
+.card-header-simple { display: flex; justify-content: space-between; align-items: center; z-index: 2; position: relative; margin-bottom: 10px; }
 .live-indicator { font-size: 10px; font-weight: 800; color: var(--color-danger); animation: blink 2s infinite; letter-spacing: 1px;}
-
 .ecg-wrapper {
-    width: 100%;
-    height: 100px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* Маска прозрачности по краям */
+    width: 100%; height: 100px; position: relative; display: flex; align-items: center; justify-content: center;
     -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
     mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
 }
-
 .ecg-svg { width: 100%; height: 100%; overflow: visible; }
-
 .ecg-line {
-    fill: none;
-    stroke: var(--primary);
-    stroke-width: 3;
-    stroke-linejoin: round;
-    stroke-linecap: round;
-    /* Эффект свечения */
+    fill: none; stroke: var(--primary); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round;
     filter: drop-shadow(0 0 4px var(--primary)); 
-    /* Анимация движения */
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-    animation: dash 3s linear infinite;
+    stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: dash 3s linear infinite;
 }
-
 .status-display { text-align: center; position: relative; z-index: 2; margin-top: auto; padding-bottom: 5px; }
 .bp-big { font-size: 48px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
 .bp-label { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-top: 10px; text-transform: uppercase; }
 
-/* --- FORMS --- */
+/* --- INPUTS & CONTROLS --- */
 .input-card { grid-column: 2 / 3; grid-row: 1 / 3; }
-.input-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; } /* Отступы между полями */
+.input-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 .input-group { display: flex; flex-direction: column; }
 .input-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
 
-input {
-    width: 100%;
-    background: var(--input-bg);
-    color: var(--text-main);
+/* Скрываем стандартные стрелки браузера */
+input[type="number"]::-webkit-inner-spin-button, 
+input[type="number"]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; margin: 0; 
+}
+input[type="number"] { -moz-appearance: textfield; }
+
+/* Контейнер для кастомного инпута */
+.custom-number-input {
+    display: flex;
+    align-items: center;
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 12px;
-    font-size: 15px;
-    font-weight: 500;
-    outline: none;
+    background: var(--input-bg);
+    overflow: hidden;
     transition: 0.2s;
-    font-family: inherit;
 }
-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-soft); }
+.custom-number-input:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+/* Сам инпут внутри контейнера */
+.custom-number-input input {
+    border: none;
+    box-shadow: none;
+    text-align: center;
+    padding: 10px 0;
+    width: 100%;
+}
+.custom-number-input input:focus { box-shadow: none; }
+
+/* Кнопки +/- */
+.spin-btn {
+    width: 30px;
+    height: 100%;
+    border: none;
+    background: var(--btn-control-bg);
+    color: var(--text-muted);
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+.spin-btn:hover {
+    background: var(--border);
+    color: var(--primary);
+}
+.spin-btn:active { background: var(--primary-soft); }
+
+/* Обычный инпут (дата, текст) */
+input.std-input {
+    width: 100%; background: var(--input-bg); color: var(--text-main);
+    border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+    font-size: 15px; font-weight: 500; outline: none; transition: 0.2s; font-family: inherit;
+}
+input.std-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-soft); }
+
+/* Красим иконку календаря в темной теме */
+body.dark-mode input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
 
 .btn-primary {
-    width: 100%;
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 14px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 24px;
-    letter-spacing: 0.5px;
-    transition: 0.2s;
+    width: 100%; background: var(--primary); color: #fff; border: none; border-radius: 10px;
+    padding: 14px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 24px;
+    letter-spacing: 0.5px; transition: 0.2s;
 }
 .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
 
-/* --- CHART --- */
+/* --- OTHER --- */
 .chart-card { grid-column: 1 / 2; }
 .chart-container { height: 250px; width: 100%; }
-
-/* --- TABLE --- */
 .table-wrapper { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 th { text-align: left; padding: 12px 0; color: var(--text-muted); font-size: 12px; border-bottom: 1px solid var(--border); }
 td { padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text-main); }
 .btn-text { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 12px; text-decoration: underline; }
-
 .btn-delete { 
-    background: transparent; border: 1px solid var(--border); 
-    color: var(--text-muted); width: 32px; height: 32px; 
-    border-radius: 8px; cursor: pointer; display: flex; 
-    align-items: center; justify-content: center; float: right; 
-    transition: 0.2s;
+    background: transparent; border: 1px solid var(--border); color: var(--text-muted); width: 32px; height: 32px; 
+    border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; float: right; transition: 0.2s;
 }
 .btn-delete:hover { color: var(--color-danger); border-color: var(--color-danger); }
 
@@ -271,14 +229,6 @@ td { padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 14px; c
 input:checked + .slider { background-color: var(--primary); }
 input:checked + .slider:before { transform: translateX(20px); }
 
-/* --- ANIMATIONS --- */
-@keyframes dash {
-    0% { stroke-dashoffset: 1000; }
-    100% { stroke-dashoffset: 0; }
-}
+@keyframes dash { 0% { stroke-dashoffset: 1000; } 100% { stroke-dashoffset: 0; } }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-@media (max-width: 900px) {
-    .dashboard-grid { grid-template-columns: 1fr; }
-    .input-card { grid-column: 1; grid-row: auto; }
-}
+@media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } .input-card { grid-column: 1; grid-row: auto; } }
